@@ -15,9 +15,10 @@ export default function Header() {
         <div className="container-soft grid h-full grid-cols-[auto_1fr_auto] items-center gap-4">
           {/* Lijevo: logo + naziv */}
           <Link href="/" className="flex items-center gap-2 no-underline">
-            <span
-              aria-hidden
-              className="inline-block h-5 w-5 rounded-sm bg-white/20"
+            <img
+              src="/hm_header_option_3.png"
+              alt="Hanefijski Fikh"
+              className="h-5 w-5"
             />
             <span className="text-sm font-medium tracking-tight text-white">
               Hanefijski Mezheb
