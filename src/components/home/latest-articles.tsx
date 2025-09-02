@@ -7,7 +7,7 @@ type Item = {
 
 const demo: Item[] = [
   {
-    slug: "/articles/uvod-u-fikh",
+    slug: "/articles/sta-je-fikh-i-ko-je-fakih",
     title: "Uvod u hanefijski fikh",
     excerpt: "Osnovni pojmovi, ciljevi šerijata i metodologija tumačenja.",
     image: "/images/discover/articlesbg1.png",

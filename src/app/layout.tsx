@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html
       lang="bs"
-      className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth`}
+      className={`${GeistSans.variable} ${GeistMono.variable} scroll-smooth bg-hex bg-hex-indigo bg-hex-md`}
     >
       <body className="min-h-screen antialiased selection:bg-indigo-500/30 selection:text-white flex flex-col">
         <Header />

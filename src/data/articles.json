@@ -1,0 +1,22 @@
+[
+  {
+    "id": "a1",
+    "title": "Namaz na putu: skraćivanje i spajanje prema hanefijskom mezhebu",
+    "subtitle": "Praktični vodič za musafire...",
+    "slug": "sta-je-fikh-i-ko-je-fakih",
+    "excerpt": null,
+    "content": "…",
+    "category": "Fikh putovanja",
+    "imageUrl": "https://kndmqzbgejnjmurzfiod.supabase.co/storage/v1/object/public/articles/d792dfbc-7ac4-4426-a15e-e85ffccf9973/1755707112757-picture2png",
+    "status": "published",
+    "author": {
+      "id": "u1",
+      "name": "Uredništvo Hanefijski Fikh",
+      "email": "urednistvo@example.com"
+    },
+    "createdAt": "2025-08-27T00:00:00.000Z",
+    "updatedAt": "2025-08-27T00:00:00.000Z",
+    "publishedAt": "2025-08-27T00:00:00.000Z",
+    "viewCount": 1234
+  }
+]

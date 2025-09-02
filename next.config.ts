@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
+    domains: ["images.unsplash.com", "plus.unsplash.com", "cdn.pixabay.com"],
   },
   experimental: {
     // App Router is already on; leave room for future edge adoption.
