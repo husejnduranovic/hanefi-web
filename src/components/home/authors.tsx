@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Authors() {
   const authors = [
     {
@@ -70,7 +72,7 @@ export default function Authors() {
         {/* Modern Autori badge (focused, slick) */}
         <div className="flex justify-center">
           <div className="group/badge inline-flex flex-col items-center">
-            <a
+            <Link
               href="/authors"
               aria-label="Autori"
               className="
@@ -120,7 +122,7 @@ export default function Authors() {
           bg-[radial-gradient(65%_60%_at_50%_50%,rgba(255,255,255,0.10),transparent)]
         "
               />
-            </a>
+            </Link>
 
             {/* tiny underline that reacts to badge hover */}
             <div
@@ -201,7 +203,7 @@ export default function Authors() {
 
                   {/* NEW CTA — Focused Pill + Accent Puck */}
                   <div className="absolute right-5 bottom-5">
-                    <a
+                    <Link
                       href={`/authors/${encodeURIComponent(
                         a.name.toLowerCase().replace(/ /g, "-")
                       )}`}
@@ -252,7 +254,7 @@ export default function Authors() {
                  group-hover/cta:opacity-100 transition-opacity
                  bg-[radial-gradient(70%_60%_at_70%_50%,rgba(255,255,255,0.08),transparent)]"
                       />
-                    </a>
+                    </Link>
                   </div>
 
                   {/* inner hairline */}

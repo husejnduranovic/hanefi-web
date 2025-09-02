@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SiteFooter() {
   return (
     <footer className="relative mt-16">
@@ -22,28 +24,28 @@ export default function SiteFooter() {
         </div>
 
         <nav className="flex items-center gap-5 text-sm">
-          <a
+          <Link
             href="/articles"
             className="text-white/75 hover:text-white ring-focus rounded px-1 py-0.5"
           >
             Članci
-          </a>
-          <a
+          </Link>
+          <Link
             href="/authors"
             className="text-white/75 hover:text-white ring-focus rounded px-1 py-0.5"
           >
             Autori
-          </a>
-          <a
+          </Link>
+          <Link
             href="/questions"
             className="text-white/75 hover:text-white ring-focus rounded px-1 py-0.5"
           >
             Pitanja
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-4">
-          <a
+          <Link
             href="https://github.com"
             aria-label="GitHub"
             className="text-white/75 hover:text-white ring-focus rounded p-1.5"
@@ -57,8 +59,8 @@ export default function SiteFooter() {
             >
               <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.51 2.87 8.33 6.84 9.68.5.1.68-.22.68-.48l-.01-1.7c-2.78.62-3.37-1.2-3.37-1.2-.45-1.18-1.12-1.5-1.12-1.5-.92-.64.07-.63.07-.63 1.02.07 1.56 1.07 1.56 1.07.91 1.59 2.38 1.13 2.96.86.09-.68.36-1.13.65-1.39-2.22-.26-4.56-1.15-4.56-5.12 0-1.13.39-2.06 1.03-2.79-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.77 1.06a9.24 9.24 0 0 1 5.04 0c1.93-1.33 2.77-1.06 2.77-1.06.55 1.42.2 2.47.1 2.73.64.73 1.03 1.66 1.03 2.79 0 3.98-2.34 4.85-4.57 5.11.37.33.69.97.69 1.96l-.01 2.9c0 .27.18.59.69.49A10.06 10.06 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
             </svg>
-          </a>
-          <a
+          </Link>
+          <Link
             href="https://x.com"
             aria-label="X"
             className="text-white/75 hover:text-white ring-focus rounded p-1.5"
@@ -72,7 +74,7 @@ export default function SiteFooter() {
             >
               <path d="M18.244 2H21l-6.438 7.36L22 22h-6.828l-4.78-6.25L4.8 22H2l6.84-7.82L2 2h6.828l4.52 5.91L18.244 2Zm-2.389 18h1.514L8.25 4H6.736l9.119 16Z" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
 

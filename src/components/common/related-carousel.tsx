@@ -3,6 +3,7 @@ import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay"; // optional; remove if not needed
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 
 export default function RelatedCarousel({
   items,
@@ -48,12 +49,12 @@ export default function RelatedCarousel({
                 <h3 className="text-slate-50 text-[1.02rem] leading-6 line-clamp-2 mb-3">
                   {it.title}
                 </h3>
-                <a
+                <Link
                   href="#"
                   className="glass-strong px-3 py-1.5 rounded-md text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 hover:bg-white/15 transition"
                 >
                   Pročitaj
-                </a>
+                </Link>
               </div>
             </article>
           ))}

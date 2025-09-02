@@ -134,7 +134,7 @@ export default function QuestionsToolbar({ cats }: { cats: CatOpt[] }) {
             <button
               key={s.v}
               type="button"
-              onClick={() => submit({ status: s.v as any })}
+              onClick={() => submit({ status })}
               className={`px-3 py-1.5 rounded-md text-sm font-normal soft-trans ${
                 status === s.v
                   ? "bg-white/90 text-slate-900 shadow-tinted"

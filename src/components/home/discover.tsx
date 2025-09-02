@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Discover() {
   return (
     <section id="discover" className="relative py-16 sm:py-24">
@@ -17,7 +19,7 @@ export default function Discover() {
           {/* Left: three small cards */}
           <div className="grid grid-cols-1 gap-6 md:gap-8">
             {/* 1) Osnove fikha (with image) */}
-            <a
+            <Link
               href="/articles?tema=osnove"
               className="group relative overflow-hidden rounded-2xl glass hover:bg-white/7 transition-colors"
             >
@@ -66,10 +68,10 @@ export default function Discover() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
 
             {/* 2) Postavi pitanje (no image to balance height) */}
-            <a
+            <Link
               href="/questions/ask"
               className="group relative overflow-hidden rounded-2xl glass hover:bg-white/7 transition-colors"
             >
@@ -109,10 +111,10 @@ export default function Discover() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
 
             {/* 3) Namaz u praksi (with image) */}
-            <a
+            <Link
               href="/articles?tema=namaz"
               className="group relative overflow-hidden rounded-2xl glass hover:bg-white/7 transition-colors"
             >
@@ -161,13 +163,13 @@ export default function Discover() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
 
           {/* Right: two larger cards */}
           <div className="grid grid-cols-1 gap-6 md:gap-8">
             {/* A) Preporučene teme (with image + accent line) */}
-            <a
+            <Link
               href="/articles?sort=preporuceno"
               className="group relative overflow-hidden rounded-2xl glass hover:bg-white/7 transition-colors"
             >
@@ -235,10 +237,10 @@ export default function Discover() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
 
             {/* B) Odgovori učenjaka (with image + amber accent) */}
-            <a
+            <Link
               href="/articles?tip=odgovori"
               className="group relative overflow-hidden rounded-2xl glass hover:bg-white/7 transition-colors"
             >
@@ -305,7 +307,7 @@ export default function Discover() {
                   </span>
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

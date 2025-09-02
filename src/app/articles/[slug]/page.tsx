@@ -138,7 +138,7 @@ export default async function ArticlePage({
                 {/* actions on the right */}
                 <div className="ml-auto flex items-center gap-2">
                   <CopyLinkButton />
-                  <a
+                  <Link
                     href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                       a.title
                     )}&url=${encodeURIComponent(
@@ -150,7 +150,7 @@ export default async function ArticlePage({
                     aria-label="Podijeli na X"
                   >
                     Podijeli
-                  </a>
+                  </Link>
                 </div>
                 {typeof a.viewCount === "number" && (
                   <>

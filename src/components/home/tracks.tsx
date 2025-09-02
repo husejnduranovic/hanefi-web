@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Tracks() {
   const tracks = [
     {
@@ -121,7 +123,7 @@ export default function Tracks() {
 
                   {/* SINGLE CTA — bottom-right, a bit lower + less border radius */}
                   <div className="absolute right-5 bottom-4 md:bottom-30">
-                    <a
+                    <Link
                       href={t.slug}
                       className="group/cta relative inline-flex items-center gap-2 rounded-lg
                                  px-3.5 py-2 text-sm text-white
@@ -147,7 +149,7 @@ export default function Tracks() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                    </a>
+                    </Link>
                   </div>
 
                   {/* Inner hairline */}

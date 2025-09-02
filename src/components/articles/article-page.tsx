@@ -119,7 +119,7 @@ function ParagraphOrBlock({ block }: { block: string }) {
       {block.split(/(https?:\/\/\S+)/g).map((piece, i) => {
         if (/^https?:\/\//.test(piece)) {
           return (
-            <a
+            <Link
               key={i}
               href={piece}
               className="underline decoration-indigo-400/50 underline-offset-4 hover:decoration-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 rounded-sm motion-safe:transition-colors motion-safe:duration-200 motion-reduce:transition-none"
@@ -127,7 +127,7 @@ function ParagraphOrBlock({ block }: { block: string }) {
               rel="noreferrer noopener"
             >
               {piece}
-            </a>
+            </Link>
           );
         }
         return <React.Fragment key={i}>{piece}</React.Fragment>;
@@ -158,12 +158,12 @@ export default function ArticlePage({
       // Background gradient exists globally per spec; page wrapper only controls layout/max-width
     >
       {/* Skip link for keyboard users */}
-      <a
+      <Link
         href="#sadrzaj"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus-visible:ring-2 focus-visible:ring-cyan-300/60 rounded-md bg-black/60 px-3 py-2 text-sm text-white"
       >
         Preskoči na sadržaj
-      </a>
+      </Link>
 
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-10 lg:py-12">
         {/* Shared glass surface wrapping EVERYTHING (image + text + sidebar) */}
@@ -246,7 +246,7 @@ export default function ArticlePage({
               </h2>
               <div className="mt-4 space-y-2">
                 {similar.slice(0, 5).map((post) => (
-                  <a
+                  <Link
                     key={post.id}
                     href={`/${post.slug}`}
                     className="group flex items-center gap-3 rounded-lg p-2 ring-1 ring-white/10 hover:bg-white/\[0.04\] motion-safe:transition-colors motion-safe:duration-200 motion-reduce:transition-none focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
@@ -273,7 +273,7 @@ export default function ArticlePage({
                         {post.title}
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </aside>

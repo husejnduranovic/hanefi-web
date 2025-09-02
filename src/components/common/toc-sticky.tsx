@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Item = { id: string; label: string; href: string };
@@ -24,12 +25,12 @@ export default function TOCSticky({
         <ol className="text-sm text-slate-300/90 space-y-1.5">
           {items.map((i) => (
             <li key={i.id} className="toc-item">
-              <a
+              <Link
                 href={i.href}
                 className="hover:text-white u-acc focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 rounded"
               >
                 {i.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ol>

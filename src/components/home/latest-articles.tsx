@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type Item = {
   slug: string;
   title: string;
@@ -72,12 +74,12 @@ export default function LatestArticles({ items = demo }: { items?: Item[] }) {
               Sažeta čitanja s jasnim hijerarhijama i referencama.
             </p>
           </div>
-          <a
+          <Link
             href="/articles"
             className="hidden sm:inline text-sm text-white/85 hover:text-white ring-focus rounded px-2 py-1"
           >
             Svi članci →
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 md:gap-8 overflow-visible">
@@ -94,7 +96,7 @@ export default function LatestArticles({ items = demo }: { items?: Item[] }) {
     before:ring-1 before:ring-white/10 before:opacity-35 hover:before:opacity-50
   "
             >
-              <a
+              <Link
                 href={it.slug}
                 aria-label={it.title}
                 className="relative block focus:outline-none ring-focus rounded-2xl"
@@ -162,19 +164,19 @@ export default function LatestArticles({ items = demo }: { items?: Item[] }) {
                     </span>
                   </div>
                 </div>
-              </a>
+              </Link>
             </article>
           ))}
         </div>
 
         {/* footer link for smaller set */}
         <div className="mt-10 flex justify-center sm:hidden">
-          <a
+          <Link
             href="/articles"
             className="text-sm text-white/85 hover:text-white ring-focus rounded px-2 py-1"
           >
             Svi članci →
-          </a>
+          </Link>
         </div>
       </div>
     </section>

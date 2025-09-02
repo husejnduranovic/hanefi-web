@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Search, Sun, Moon } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import SearchModal from "@/components/common/search-modal";
