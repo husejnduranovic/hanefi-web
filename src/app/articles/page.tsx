@@ -35,7 +35,7 @@ export default async function ArticlesIndex({
   const categories = Array.from(new Set(allCategories.map((c) => c.name)));
 
   // Filter + sort in-memory (mock). Replace with DB call later.
-  let filtered = articles.filter((a) => {
+  const filtered = articles.filter((a) => {
     const okCat = !category || a.category === category;
     const okQ =
       !q ||

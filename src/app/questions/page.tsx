@@ -29,7 +29,7 @@ export default async function QuestionsIndex({
 
   const tags = Array.from(new Set(allQ.flatMap((x) => x.tags))).sort();
 
-  let filtered = allQ.filter((x) => {
+  const filtered = allQ.filter((x) => {
     const okStatus =
       !status || (status === "answered" ? x.answered : !x.answered);
     const okTag = !tag || x.tags.includes(tag);

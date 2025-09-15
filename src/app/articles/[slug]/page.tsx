@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { articles, categories } from "@/lib/mock";
+import { Article, articles, categories } from "@/lib/mock";
 import { formatDate } from "@/lib/utils";
 import { slugify } from "@/lib/utils";
 import { ProgressBar } from "@/components/common/progress-bar";
@@ -22,7 +22,7 @@ export default async function ArticlePage({
   const article = articles.find((a) => a.slug === slug);
   if (!article) return notFound();
 
-  const content: string = (article as any).content ?? article.excerpt ?? "";
+  const content: string = (article as Article).content ?? article.excerpt ?? "";
   const toc = Array.from(content.matchAll(/^##\s+(.+)$/gm)).map((m) => {
     const text = m[1].trim();
     return {

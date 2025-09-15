@@ -68,8 +68,8 @@ export default function AskQuestionPage() {
             onChange={setCategory}
           />
           <p className="mt-1 text-xs text-slate-400">
-            Možete ovo ostaviti na "Bez kategorije". Kategorizovat ćemo to
-            kasnije.
+            Možete ovo ostaviti na &quot;Bez kategorije&quot;. Kategorizovat
+            ćemo to kasnije.
           </p>
         </div>
 

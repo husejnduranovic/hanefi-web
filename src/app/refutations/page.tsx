@@ -15,7 +15,7 @@ export default async function RefutationsIndex({
 
   const topics = Array.from(new Set(allRefs.map((r) => r.topic))).sort();
 
-  let filtered = allRefs.filter((r) => {
+  const filtered = allRefs.filter((r) => {
     const okTopic = !topic || r.topic === topic;
     const okQ =
       !q ||

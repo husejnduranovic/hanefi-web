@@ -1,23 +1,18 @@
+import { Refutation } from "@/lib/mock";
 import Link from "next/link";
-import type { Refutation } from "@/lib/mock";
 
-/**
- * Supports EITHER shape:
- *   <RefutationCard refutation={r} />
- *   <RefutationCard href="/refutations/slug" title="..." topic="..." summary="..." />
- */
-export function RefutationCard(
-  props:
-    | { refutation: Refutation }
-    | { href: string; title: string; topic: string; summary: string }
-) {
-  const r = (props as any).refutation as Refutation | undefined;
+type RefutationCardProps =
+  | { refutation: Refutation }
+  | { href: string; title: string; topic: string; summary: string };
+
+export function RefutationCard(props: RefutationCardProps) {
+  const r = "refutation" in props ? props.refutation : undefined;
 
   const href =
-    (props as any).href ?? (r ? `/refutations/${r.slug}` : undefined);
-  const title = (props as any).title ?? r?.title ?? "";
-  const topic = (props as any).topic ?? r?.topic ?? "";
-  const summary = (props as any).summary ?? r?.summary ?? "";
+    "href" in props ? props.href : r ? `/refutations/${r.slug}` : undefined;
+  const title = "title" in props ? props.title : r?.title ?? "";
+  const topic = "topic" in props ? props.topic : r?.topic ?? "";
+  const summary = "summary" in props ? props.summary : r?.summary ?? "";
 
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:border-fuchsia-400/40 hover:bg-white/7">
