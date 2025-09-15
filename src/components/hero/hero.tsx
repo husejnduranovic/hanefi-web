@@ -1,36 +1,41 @@
+import Link from "next/link";
+
 export default function Hero() {
   return (
-    <section className="relative mt-10 sm:mt-14 py-16 sm:py-28">
-      <div className="container-soft">
-        <div className="relative mx-auto max-w-3xl text-center">
-          {/* Soft indigo glow behind text (uses your .glow-oval utility) */}
-          <div aria-hidden className="glow-oval glow-indigo glow-oval-soft" />
-
-          {/* Title */}
-          <h1
-            className="text-5xl sm:text-7xl font-bold leading-[1.05] tracking-tight"
-            style={{ textWrap: "balance" as any }}
-          >
-            <span className="text-white text-depth">Hanefijski mezheb</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            className="mt-5 text-lg sm:text-xl text-slate-300"
-            style={{ textWrap: "balance" as any }}
-          >
-            Sažeta objašnjenja, provjereni izvori i praktični odgovori na jednom
-            mjestu.
-          </p>
-
-          {/* Subtle accent line (keeps it modern without clutter) */}
-          <span
-            aria-hidden
-            className="mt-7 inline-block h-[2px] w-24 rounded-full 
-                       bg-[linear-gradient(90deg,rgba(129,140,248,.9),rgba(56,189,248,.9))]"
-          />
+    <section className="relative isolate pt-14">
+      <div className="mx-auto max-w-5xl text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+          <CrescentIcon className="h-3.5 w-3.5" />
+          Dobrodošli — Moderan centar za islamsko znanje
+        </span>
+        <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+          Čitaj, uči, i pitaj —
+          <span className="from-cyan-400 to-blue-500 bg-gradient-to-r bg-clip-text text-transparent">
+            {" "}
+            sa jasnoćom i poštovanjem
+          </span>
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-pretty text-slate-300">
+          Članci organizirani po kategorijama, zajednički Q&A za praktična
+          pitanja, i posvećen odjeljak za pobijanja.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link href="/articles" className="btn-primary">
+            Pregledaj Članke
+          </Link>
+          <Link href="/questions" className="btn-ghost">
+            Postavi Pitanje
+          </Link>
         </div>
       </div>
     </section>
+  );
+}
+
+function CrescentIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+    </svg>
   );
 }

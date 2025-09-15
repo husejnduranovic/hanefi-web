@@ -1,184 +1,133 @@
-// components/QuestionsToolbar.tsx
+// components/questions/QuestionToolbar.tsx
 "use client";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import Link from "next/link";
+type Status = "all" | "answered" | "awaiting";
 
-type CatOpt = { slug: string; title: string };
-const ALL = "__all__";
+const STATUS_OPTS: Array<{ value: Status; label: string }> = [
+  { value: "all", label: "Sva" },
+  { value: "answered", label: "Odgovoreno" },
+  { value: "awaiting", label: "U procesu" },
+];
 
-export default function QuestionsToolbar({ cats }: { cats: CatOpt[] }) {
+export function QuestionToolbar({ tags }: { tags: string[] }) {
   const router = useRouter();
+  const pathname = usePathname();
   const sp = useSearchParams();
 
-  const [q, setQ] = useState(sp.get("q") ?? "");
-  const [cat, setCat] = useState(sp.get("category") ?? "");
-  const status =
-    (sp.get("status") as "all" | "unanswered" | "answered") ?? "all";
-  const sort = (sp.get("sort") === "popular" ? "popular" : "latest") as
-    | "latest"
-    | "popular";
+  // read params
+  const q0 = sp.get("q") ?? "";
+  const t0 = sp.get("tag") ?? "";
+  const rawStatus = (sp.get("status") ?? "all").toLowerCase();
+  const s0: Status = (["all", "answered", "awaiting"] as const).includes(
+    rawStatus as Status
+  )
+    ? (rawStatus as Status)
+    : "all";
 
-  function submit(
-    next: Partial<{
-      q: string;
-      category: string;
-      status: "all" | "unanswered" | "answered";
-      sort: "latest" | "popular";
-    }>
-  ) {
-    const params = new URLSearchParams(sp?.toString() ?? "");
-    if (next.q !== undefined)
-      next.q ? params.set("q", next.q) : params.delete("q");
-    if (next.category !== undefined)
-      next.category
-        ? params.set("category", next.category)
-        : params.delete("category");
-    if (next.status) params.set("status", next.status);
-    if (next.sort) params.set("sort", next.sort);
-    router.push(`/questions?${params.toString()}`);
+  // local search state (debounced to URL)
+  const [q, setQ] = useState(q0);
+  useEffect(() => setQ(q0), [q0]);
+
+  // build a fresh URLSearchParams when needed
+  const paramsString = useMemo(() => sp.toString(), [sp]);
+
+  // debounce q -> URL
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const params = new URLSearchParams(paramsString);
+      if (q) params.set("q", q);
+      else params.delete("q");
+      params.delete("page");
+      router.replace(`${pathname}?${params.toString()}`);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [q, paramsString, pathname, router]);
+
+  function setParam(key: string, value: string) {
+    const params = new URLSearchParams(paramsString);
+    if (value) params.set(key, value);
+    else params.delete(key);
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
   }
 
   return (
-    <form
-      action="/questions"
-      method="GET"
-      className="rounded-2xl ring-tinted shadow-tinted glass p-5 space-y-4"
-    >
-      {/* Row 1: big search with affixed icon */}
-      <div className="relative">
-        <label htmlFor="q" className="sr-only">
-          Pretraga
-        </label>
+    <div className="glass flex flex-col gap-3 rounded-2xl p-3">
+      {/* Row 1: search + segmented status (desktop) */}
+      <div className="flex items-center gap-2">
         <input
-          id="q"
-          name="q"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Traži pitanja…"
-          className="field w-full px-4 py-3 pr-12"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") submit({ q, category: cat });
-          }}
+          placeholder="Pretraga pitanja…"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-cyan-400/60"
+          aria-label="Search"
         />
-        <button
-          type="button"
-          aria-label="Pretraži"
-          className="icon-btn inline-grid absolute right-2.5 top-1/2 -translate-y-1/2 h-9 w-9"
-          onClick={() => submit({ q, category: cat })}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
-            <circle
-              cx="11"
-              cy="11"
-              r="6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            />
-            <path
-              d="M20 20l-3.2-3.2"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-      </div>
 
-      {/* Row 2: filters */}
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        {/* Category */}
-        <div className="w-full sm:w-56">
-          <Select
-            value={cat || undefined}
-            onValueChange={(v) => {
-              if (v === ALL) {
-                setCat("");
-                submit({ category: "" });
-              } else {
-                setCat(v);
-                submit({ category: v });
-              }
-            }}
-          >
-            <SelectTrigger className="w-full field px-3 py-2 text-slate-200">
-              <SelectValue placeholder="Sve kategorije" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#0b1220] text-slate-200 border-white/10">
-              <SelectItem value={ALL}>Sve kategorije</SelectItem>
-              {cats.map((c) => (
-                <SelectItem key={c.slug} value={c.slug}>
-                  {c.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Status */}
-        <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-1">
-          {[
-            { v: "all", label: "Sva" },
-            { v: "unanswered", label: "Bez odgovora" },
-            { v: "answered", label: "Sa odgovorom" },
-          ].map((s) => (
+        {/* Desktop segmented control */}
+        <div className="hidden sm:flex items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs">
+          {STATUS_OPTS.map(({ value, label }) => (
             <button
-              key={s.v}
+              key={value}
               type="button"
-              onClick={() => submit({ status })}
-              className={`px-3 py-1.5 rounded-md text-sm font-normal soft-trans ${
-                status === s.v
-                  ? "bg-white/90 text-slate-900 shadow-tinted"
-                  : "text-slate-300 hover:text-white hover:bg-white/10"
+              onClick={() => setParam("status", value === "all" ? "" : value)}
+              aria-pressed={s0 === value}
+              className={`min-w-[6.5rem] rounded-lg px-3 py-1.5 transition ${
+                s0 === value
+                  ? "bg-white/10 text-white"
+                  : "text-slate-300 hover:bg-white/5"
               }`}
             >
-              {s.label}
+              {label}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Sort */}
-        <div className="inline-flex rounded-lg border border-white/10 bg-white/5 p-1">
-          <button
-            type="button"
-            onClick={() => submit({ sort: "latest" })}
-            className={`px-3 py-1.5 rounded-md text-sm font-normal soft-trans ${
-              sort === "latest"
-                ? "bg-white/90 text-slate-900 shadow-tinted"
-                : "text-slate-300 hover:text-white hover:bg-white/10"
-            }`}
-          >
-            Najnovije
-          </button>
-          <button
-            type="button"
-            onClick={() => submit({ sort: "popular" })}
-            className={`px-3 py-1.5 rounded-md text-sm font-normal soft-trans ${
-              sort === "popular"
-                ? "bg-white/90 text-slate-900 shadow-tinted"
-                : "text-slate-300 hover:text-white hover:bg-white/10"
-            }`}
-          >
-            Najčitanije
-          </button>
-        </div>
-
-        {/* Ask CTA */}
-        <div className="ml-auto">
-          <Link href="/questions/ask" className="btn-primary">
-            Postavi pitanje
-          </Link>
+      {/* Row 2: tag chips */}
+      <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <div className="flex gap-2">
+          {["", ...tags].map((t) => {
+            const label = t || "Svi tagovi";
+            const selected = (t0 || "") === (t || "");
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setParam("tag", t)}
+                aria-pressed={selected}
+                className={`whitespace-nowrap rounded-xl border px-3 py-1.5 text-sm transition ${
+                  selected
+                    ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-200"
+                    : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
-    </form>
+
+      {/* Mobile status chips (same values, smaller UI) */}
+      <div className="flex sm:hidden gap-2">
+        {STATUS_OPTS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setParam("status", value === "all" ? "" : value)}
+            aria-pressed={s0 === value}
+            className={`whitespace-nowrap rounded-xl border px-3 py-1.5 text-sm transition ${
+              s0 === value
+                ? "border-cyan-400/50 bg-cyan-400/10 text-cyan-200"
+                : "border-white/10 bg-white/5 text-slate-300 hover:border-white/20"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

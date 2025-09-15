@@ -1,58 +1,53 @@
-// src/components/articles/article-card.tsx
-import Image from "next/image";
+// components/cards/ArticleCard.tsx
 import Link from "next/link";
+import Image from "next/image";
+import { formatDate } from "@/lib/utils";
+import type { Article } from "@/lib/mock";
 
-type Props = {
-  href: string;
-  title: string;
-  excerpt?: string;
-  imageUrl?: string | null;
-};
-
-export default function ArticleCard({ href, title, excerpt, imageUrl }: Props) {
+export function ArticleCard({ article }: { article: Article }) {
   return (
-    <article
-      className="
-        group overflow-hidden rounded-lg
-        ring-1 ring-white/10
-        backdrop-blur-md
-        bg-white/1 hover:bg-white/30
-        transition-colors duration-200
-      "
-    >
-      <Link
-        href={href}
-        className="block no-underline focus-visible:outline-none"
-      >
-        {/* TOP: image */}
-        <div className="h-56 w-full overflow-hidden">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={title}
-              width={1200}
-              height={675}
-              className="block h-full w-full object-cover"
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-slate-800 to-slate-900" />
-          )}
+    <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition hover:border-cyan-400/40 hover:bg-white/7">
+      {article.imageUrl && (
+        <div className="relative aspect-[16/9] overflow-hidden">
+          <Image
+            src={article.imageUrl}
+            alt=""
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition duration-500 group-hover:scale-[1.03]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
+          <div className="absolute left-3 top-3 flex items-center gap-2 text-xs">
+            <span className="rounded-full bg-cyan-400/15 px-2 py-0.5 text-cyan-300">
+              {article.category}
+            </span>
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-slate-200">
+              {article.readTime} min
+            </span>
+          </div>
         </div>
-
-        {/* BOTTOM: text area — also goes transparent on hover */}
-        <div
-          className="
-            border-t border-white/10
-            bg-white/10 group-hover:bg-transparent
-            backdrop-blur-md
-            transition-colors duration-200
-            p-6
-          "
-        >
-          <h3 className="text-lg font-light text-slate-100">{title}</h3>
-          {excerpt && <p className="mt-1 text-sm text-slate-300">{excerpt}</p>}
-        </div>
-      </Link>
+      )}
+      <div className="p-4">
+        <h3 className="text-lg font-medium leading-tight">
+          <Link
+            href={`/articles/${article.slug}`}
+            className="focus:outline-none"
+          >
+            <span className="absolute inset-0" aria-hidden />
+            {article.title}
+          </Link>
+        </h3>
+        <p className="mt-2 line-clamp-2 text-sm text-slate-300/85">
+          {article.excerpt}
+        </p>
+      </div>
+      <div className="px-4 pb-4 text-xs text-slate-400">
+        <time dateTime={article.createdAt}>
+          {formatDate(article.createdAt)}
+        </time>
+        <span aria-hidden> • </span>
+        <span>{article.viewCount} pregleda</span>
+      </div>
     </article>
   );
 }

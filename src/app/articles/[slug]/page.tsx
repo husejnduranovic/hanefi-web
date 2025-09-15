@@ -1,254 +1,241 @@
-import type { Metadata } from "next";
+// app/articles/[slug]/page.tsx
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fetchArticleBySlug, fetchRelatedArticles } from "@/lib/api";
-import ReadingProgress from "@/components/common/reading-progress";
-import CopyLinkButton from "@/components/common/copy-link-button";
+import { articles, categories } from "@/lib/mock";
+import { formatDate } from "@/lib/utils";
+import { slugify } from "@/lib/utils";
+import { ProgressBar } from "@/components/common/progress-bar";
+import { TableOfContents } from "@/components/articles/table-of-contents";
+import { NavPrevNext } from "@/components/common/nav-prev-next";
+import { ArticleCard } from "@/components/articles/article-card";
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 
-const CAT_SLUG: Record<string, string> = {
-  Fikh: "fikh",
-  Akida: "akida",
-  Sunnet: "sunnet",
-  "Kur'an": "kuran",
-  Pobijanja: "pobijanja",
-};
-
-const THEME_CLASS: Record<string, string> = {
-  "Kur'an": "theme-kuran",
-  Sunnet: "theme-sunnet",
-  Akida: "theme-akida",
-  Fikh: "theme-fikh",
-  Pobijanja: "theme-pobijanja",
-};
-
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const a = await fetchArticleBySlug(params.slug);
-  if (!a) return { title: "Članak nije pronađen" };
-  const desc = a.excerpt || a.subtitle || "Članak";
-  return {
-    title: a.title,
-    description: desc,
-    openGraph: {
-      title: a.title,
-      description: desc,
-      images: a.imageUrl ? [{ url: a.imageUrl }] : undefined,
-      type: "article",
-    },
-  };
-}
-
-type CSSVars = React.CSSProperties & {
-  ["--page-cover-image"]?: string;
-  ["--page-cover-opacity"]?: string;
-};
+type Params = { slug: string };
 
 export default async function ArticlePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<Params>;
 }) {
-  const a = await fetchArticleBySlug(params.slug);
-  if (!a) notFound();
+  const { slug } = await params;
+  const article = articles.find((a) => a.slug === slug);
+  if (!article) return notFound();
 
-  const theme = THEME_CLASS[a.category] ?? "";
-  const coverStyle: CSSVars = a.imageUrl
-    ? {
-        "--page-cover-image": `url('${a.imageUrl}')`,
-        "--page-cover-opacity": ".22",
-      }
-    : {};
-
-  const catSlug = CAT_SLUG[a.category] ?? "";
-  const dateFmt = new Date(a.publishedAt).toLocaleDateString("bs-BA");
-
-  // ultra-light reading time (fallback): ~200 wpm
-  const wordCount =
-    a.content
-      ?.replace(/<[^>]+>/g, " ")
-      .split(/\s+/)
-      .filter(Boolean).length || 0;
-  const readMin = Math.max(1, Math.round(wordCount / 200));
-
-  const related = await fetchRelatedArticles({
-    category: a.category,
-    excludeSlug: a.slug,
-    limit: 6,
-    sort: "novo",
+  const content: string = (article as any).content ?? article.excerpt ?? "";
+  const toc = Array.from(content.matchAll(/^##\s+(.+)$/gm)).map((m) => {
+    const text = m[1].trim();
+    return {
+      id: slugify ? slugify(text) : text.toLowerCase().replace(/\s+/g, "-"),
+      text,
+    };
   });
 
+  const cat = categories.find((c) => c.name === article.category);
+  const catHref = cat
+    ? `/categories/${cat.slug}`
+    : `/articles?category=${encodeURIComponent(article.category)}`;
+
+  const sorted = [...articles].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const idx = sorted.findIndex((a) => a.slug === article.slug);
+  const prev = idx > 0 ? sorted[idx - 1] : null;
+  const next = idx < sorted.length - 1 ? sorted[idx + 1] : null;
+
+  const related = articles
+    .filter((a) => a.category === article.category && a.slug !== article.slug)
+    .slice(0, 3);
+
+  // A tiny helper so we don't repeat the textShadow inline everywhere
+  const shadow: React.CSSProperties = {
+    textShadow: "0 1px 2px rgba(2,6,23,.45)",
+  };
+
   return (
-    <main
-      className={`${theme} ${a.imageUrl ? "page-cover" : ""}`}
-      style={coverStyle}
-    >
-      {/* NEW: thin progress bar */}
-      <ReadingProgress />
+    <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <ProgressBar />
+      <Breadcrumbs
+        className="mt-6"
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Articles", href: "/articles" },
+          { label: article.category, href: catHref },
+          { label: article.title },
+        ]}
+      />
 
-      <article className="relative py-10 sm:py-14">
-        <div className="container-soft">
-          {/* Hero */}
-          <header className="relative overflow-hidden rounded-2xl ring-tinted shadow-tinted">
-            <div
-              className={`relative px-6 sm:px-8 py-10 ${
-                a.imageUrl ? "vignette-b" : ""
-              }`}
-            >
-              <nav className="text-sm text-slate-300/90">
-                <Link href="/" className="hover:underline">
-                  Početna
-                </Link>
-                <span className="mx-1">/</span>
-                {catSlug ? (
-                  <Link
-                    href={`/kategorije/${catSlug}`}
-                    className="hover:underline"
-                  >
-                    {a.category}
-                  </Link>
-                ) : (
-                  <span>{a.category}</span>
-                )}
-              </nav>
-
-              <h1 className="mt-3 text-white text-3xl sm:text-4xl font-bold tracking-tight">
-                {a.title}
-              </h1>
-
-              {(a.subtitle || a.excerpt) && (
-                <p className="mt-3 text-slate-300 max-w-3xl">
-                  {a.excerpt || a.subtitle}
-                </p>
-              )}
-
-              <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-slate-300">
-                <div className="inline-flex items-center gap-2">
-                  <span className="opacity-80">Autor:</span>
-                  <span className="text-white/95">
-                    {a.author?.name ?? "Uredništvo"}
-                  </span>
-                </div>
-                <span className="opacity-30">•</span>
-                <time dateTime={a.publishedAt}>{dateFmt}</time>
-                <span className="opacity-30">•</span>
-                <span>{readMin} min čitanja</span>
-                {/* actions on the right */}
-                <div className="ml-auto flex items-center gap-2">
-                  <CopyLinkButton />
-                  <Link
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                      a.title
-                    )}&url=${encodeURIComponent(
-                      (process.env.NEXT_PUBLIC_SITE_URL ?? "") +
-                        "/articles/" +
-                        a.slug
-                    )}`}
-                    className="chip-lg soft-trans hover:bg-white/20"
-                    aria-label="Podijeli na X"
-                  >
-                    Podijeli
-                  </Link>
-                </div>
-                {typeof a.viewCount === "number" && (
-                  <>
-                    <span className="opacity-30">•</span>
-                    <span>{a.viewCount.toLocaleString("bs-BA")} pregleda</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </header>
-
-          {/* Body */}
-          <section className="mt-8 rounded-2xl ring-tinted glass shadow-tinted p-6 sm:p-8">
-            {/* NOTE: expects already-sanitized HTML from backend. */}
-            <div
-              className="prose-rich max-w-none space-y-5"
-              dangerouslySetInnerHTML={{ __html: a.content }}
+      {/* Hero */}
+      <section className="mt-6 overflow-hidden rounded-3xl border border-white/10">
+        <div className="relative aspect-[16/7] sm:aspect-[16/6]">
+          {article.imageUrl && (
+            <Image
+              src={article.imageUrl}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1024px) 1024px, 100vw"
+              className="object-cover"
             />
-          </section>
-
-          {/* NEW: Related */}
-          {related.length >= 3 && (
-            <section className="mt-30">
-              <h2 className="text-white text-xl font-semibold tracking-tight">
-                Srodni članci
-              </h2>
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {related.map((it, i) => (
-                  <Link
-                    key={it.id}
-                    href={`/articles/${it.slug}`}
-                    className="group block relative overflow-hidden rounded-2xl ring-tinted glass shadow-tinted accent-ring soft-trans hover:-translate-y-1 hover:shadow-tinted-2 p-5"
-                  >
-                    <div aria-hidden className="absolute inset-0 -z-10">
-                      <img
-                        src={"/images/discover/discovercardbg4.png"}
-                        alt=""
-                        className="h-full w-full object-cover opacity-60 transition-transform duration-500 ease-out group-hover:scale-105 will-change-transform"
-                        loading="lazy"
-                      />
-                      <div className="card-veil" />
-                    </div>
-
-                    {it.badge && (
-                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-white/10 text-white ring-1 ring-white/15">
-                        {it.badge}
-                      </span>
-                    )}
-                    <h3 className="mt-2 text-white font-semibold tracking-tight">
-                      {it.title}
-                    </h3>
-                    {it.excerpt && (
-                      <p className="mt-2 text-slate-200 whitespace-pre-line">
-                        {it.excerpt}
-                      </p>
-                    )}
-                    <div className="mt-4 flex items-center justify-between text-xs text-slate-300">
-                      <time dateTime={it.date}>
-                        {new Date(it.date).toLocaleDateString("bs-BA")}
-                      </time>
-                      <span>{it.views.toLocaleString("bs-BA")} pregleda</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
           )}
 
-          {/* Footer actions (optional) */}
-          <footer className="mt-8 flex justify-between items-center">
-            <Link
-              href={catSlug ? `/categories/${catSlug}` : "/kategorije"}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium
-                         text-slate-900 bg-white/90 ring-1 ring-white/20 shadow-tinted hover:bg-white soft-trans"
-            >
-              ← Nazad na {a.category}
-            </Link>
-          </footer>
-        </div>
-      </article>
+          {/* Stronger multi-stop gradient to guarantee contrast at the bottom */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(2,6,23,0.86) 0%, rgba(2,6,23,0.68) 35%, rgba(2,6,23,0.38) 60%, rgba(2,6,23,0.18) 80%, rgba(2,6,23,0.00) 100%)",
+            }}
+            aria-hidden
+          />
 
-      {/* JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            headline: a.title,
-            datePublished: a.publishedAt,
-            author: a.author?.name
-              ? [{ "@type": "Person", name: a.author.name }]
-              : undefined,
-            image: a.imageUrl ? [a.imageUrl] : undefined,
-            articleSection: a.category,
-          }),
-        }}
-      />
+          <div className="absolute inset-x-0 bottom-0 p-6 sm:px-8 sm:pb-8">
+            {/* meta row */}
+            <div
+              className="flex flex-wrap items-center gap-2 text-xs text-slate-100"
+              style={shadow}
+            >
+              <Link
+                href={catHref}
+                className="rounded-full px-2 py-0.5 text-slate-50 ring-1 ring-white/20"
+                style={{
+                  background: "rgba(2,6,23,0.45)", // subtle scrim behind chip
+                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
+                }}
+              >
+                {article.category}
+              </Link>
+              <span aria-hidden className="text-slate-50">
+                •
+              </span>
+              <time dateTime={article.createdAt} className="text-slate-50">
+                {formatDate(article.createdAt)}
+              </time>
+              <span aria-hidden className="text-slate-50">
+                •
+              </span>
+              <span className="text-slate-50">
+                {article.readTime} min čitanja
+              </span>
+              <span aria-hidden className="text-slate-50">
+                •
+              </span>
+              <span className="text-slate-50">
+                {article.viewCount} pregleda
+              </span>
+            </div>
+
+            {/* title */}
+            <h1
+              className="mt-3 text-balance text-3xl font-semibold text-slate-50 sm:text-4xl"
+              style={shadow}
+            >
+              {article.title}
+            </h1>
+
+            {/* excerpt */}
+            {article.excerpt && (
+              <p
+                className="mt-2 max-w-3xl text-pretty text-slate-100/95"
+                style={shadow}
+              >
+                {article.excerpt}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Content + ToC */}
+      <section className="mx-auto mt-10 max-w-5xl lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10">
+        {/* Left column */}
+        <article className="mx-auto max-w-3xl text-base leading-8 text-slate-200/95 sm:text-lg">
+          <ArticleContent content={content} />
+        </article>
+
+        {/* Right column */}
+        {toc.length > 0 && (
+          <aside className="sticky top-20 hidden self-start lg:block">
+            <TableOfContents items={toc} />
+          </aside>
+        )}
+
+        {/* Full-width row (spans both columns) */}
+        <div className="mt-12 lg:col-span-2">
+          <NavPrevNext
+            prev={
+              prev
+                ? {
+                    href: `/articles/${prev.slug}`,
+                    title: prev.title,
+                    eyebrow: "Prethodno",
+                  }
+                : null
+            }
+            next={
+              next
+                ? {
+                    href: `/articles/${next.slug}`,
+                    title: next.title,
+                    eyebrow: "Slijedeće",
+                  }
+                : null
+            }
+          />
+        </div>
+      </section>
+
+      {/* Related */}
+      {related.length > 0 && (
+        <section className="mt-16">
+          <div className="mb-6 flex items-end justify-between">
+            <h2 className="text-xl font-semibold">
+              Povezano u {article.category}
+            </h2>
+            <Link href="/articles" className="btn-ghost text-xs">
+              Svi članci
+            </Link>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((a) => (
+              <ArticleCard key={a.id} article={a} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="py-16" />
     </main>
+  );
+}
+
+/** Minimal renderer: paragraphs + `##` subheadings (with anchors) */
+function ArticleContent({ content }: { content: string }) {
+  const blocks = content.split(/\n{2,}/).filter(Boolean);
+  return (
+    <div className="space-y-5">
+      {blocks.map((block, i) => {
+        if (/^##\s+/.test(block)) {
+          const text = block.replace(/^##\s+/, "").trim();
+          const id = slugify
+            ? slugify(text)
+            : text.toLowerCase().replace(/\s+/g, "-");
+          return (
+            <h2
+              id={id}
+              key={i}
+              className="pt-6 text-2xl font-semibold tracking-tight text-slate-50"
+            >
+              {text}
+            </h2>
+          );
+        }
+        return (
+          <p key={i} className="text-slate-200/95">
+            {block}
+          </p>
+        );
+      })}
+    </div>
   );
 }

@@ -1,64 +1,92 @@
 // app/questions/page.tsx
+import type { Metadata } from "next";
+import { questions as allQ } from "@/lib/mock";
+import { Section } from "@/components/common/section";
+import { QuestionToolbar } from "@/components/questions/questions-toolbar";
+import { QuestionCard } from "@/components/questions/question-card";
+import { Pagination } from "@/components/common/pagination";
 
-import QuestionRowCard from "@/components/questions/question-row-card";
-import QuestionsToolbar from "@/components/questions/questions-toolbar";
-import { fetchCategories, fetchQuestions } from "@/lib/api";
-import Link from "next/link";
+export const metadata: Metadata = { title: "Questions" };
 
-export const dynamic = "force-dynamic";
+const PAGE_SIZE = 10;
 
 export default async function QuestionsIndex({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
-    category?: string;
-    status?: "all" | "unanswered" | "answered";
-    sort?: "latest" | "popular";
+    status?: "answered" | "awaiting";
+    tag?: string;
     page?: string;
-  };
+  }>;
 }) {
-  const q = (searchParams.q ?? "").trim();
-  const category = searchParams.category ?? "";
-  const status = (searchParams.status ?? "all") as
-    | "all"
-    | "unanswered"
-    | "answered";
-  const sort = (searchParams.sort === "popular" ? "popular" : "latest") as
-    | "latest"
-    | "popular";
+  const {
+    q = "",
+    status = undefined,
+    tag = "",
+    page = "1",
+  } = await searchParams;
 
-  const [cats, { items }] = await Promise.all([
-    fetchCategories(),
-    fetchQuestions({ q, category, status, sort, page: 1, limit: 30 }),
-  ]);
+  const tags = Array.from(new Set(allQ.flatMap((x) => x.tags))).sort();
+
+  let filtered = allQ.filter((x) => {
+    const okStatus =
+      !status || (status === "answered" ? x.answered : !x.answered);
+    const okTag = !tag || x.tags.includes(tag);
+    const okQ =
+      !q ||
+      [x.title, x.body ?? "", x.answer ?? "", x.tags.join(" ")]
+        .join(" ")
+        .toLowerCase()
+        .includes(q.toLowerCase());
+    return okStatus && okTag && okQ;
+  });
+
+  // sort newest first by date
+  filtered.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
+  const pageNum = Math.max(
+    1,
+    parseInt(Array.isArray(page) ? page[0] : page, 10) || 1
+  );
+  const start = (pageNum - 1) * PAGE_SIZE;
+  const paged = filtered.slice(start, start + PAGE_SIZE);
 
   return (
-    <main className="relative py-10 sm:py-14">
-      <div className="container-soft space-y-6">
-        <QuestionsToolbar
-          cats={cats.map((c) => ({ slug: c.slug, title: c.title }))}
-        />
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Section
+        title="Odgovori i pitanja"
+        subtitle={`${filtered.length} rezultat${
+          filtered.length === 1 ? "" : "a"
+        }`}
+        cta={{ label: "Postavi pitanje", href: "/questions/ask" }}
+      >
+        <QuestionToolbar tags={tags} />
 
-        {items.length === 0 ? (
-          <div className="rounded-2xl glass ring-tinted shadow-tinted p-8 text-slate-300">
-            Nema pitanja za tražene filtere.{" "}
-            <Link
-              href="/questions/ask"
-              className="underline underline-offset-4 decoration-white/40 hover:text-white"
-            >
-              Postavi prvo pitanje
-            </Link>
-            .
-          </div>
-        ) : (
-          <div className="space-y-9">
-            {items.map((q) => (
-              <QuestionRowCard key={q.id} q={q} />
-            ))}
-          </div>
-        )}
-      </div>
+        <div className="mt-6 grid gap-4">
+          {paged.map((q) => (
+            <QuestionCard
+              key={q.id}
+              href={`/questions/${q.slug}`}
+              title={q.title}
+              tags={q.tags}
+              answered={q.answered}
+              date={q.date}
+              excerpt={q.body}
+            />
+          ))}
+        </div>
+
+        <Pagination
+          page={pageNum}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+        />
+      </Section>
+
+      <div className="py-16" />
     </main>
   );
 }

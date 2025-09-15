@@ -1,10 +1,13 @@
-export default function LoadingArticle() {
+import {
+  ArticleBodySkeleton,
+  ArticleHeroSkeleton,
+} from "@/components/common/sekeleton";
+
+export default function Loading() {
   return (
-    <section className="relative py-10 sm:py-14">
-      <div className="container-soft animate-pulse">
-        <div className="h-40 rounded-2xl glass-strong ring-tinted" />
-        <div className="mt-6 h-72 rounded-2xl glass-strong ring-tinted" />
-      </div>
-    </section>
+    <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <ArticleHeroSkeleton />
+      <ArticleBodySkeleton paragraphs={8} />
+    </main>
   );
 }

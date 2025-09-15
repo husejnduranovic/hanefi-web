@@ -1,104 +1,84 @@
-// app/questions/ask/page.tsx
-import Link from "next/link";
-import { fetchCategories } from "@/lib/api";
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { categories } from "@/lib/mock";
+import { RadioChips } from "@/components/common/radio-chips";
 
-export const dynamic = "force-dynamic";
+export default function AskQuestionPage() {
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [category, setCategory] = useState<string>(""); // optional
 
-export default async function AskQuestionPage() {
-  const cats = await fetchCategories();
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const catMsg = category
+      ? `\nCategory: ${category}`
+      : "\nCategory: (none selected)";
+    alert("Your question was submitted and is pending review." + catMsg);
+    router.push("/questions");
+  }
+
+  const catOptions = [
+    { label: "Nema kategorije", value: "" },
+    ...categories.map((c) => ({ label: c.name, value: c.name })),
+  ];
 
   return (
-    <main className="relative py-10 sm:py-14">
-      <div className="container-soft max-w-3xl">
-        <header className="mb-6">
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Postavi pitanje
-          </h1>
-          <p className="mt-3 text-slate-300">
-            Postavi jasno pitanje — odgovor će sadržavati citate i uputnice.
+    <main className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+      <header className="mt-8">
+        <h1 className="text-2xl font-semibold">Postavi pitanje</h1>
+        <p className="mt-1 text-sm text-slate-300">
+          Budite koncizni. Ako je moguće, uključite relevantne detalje i izvore.
+        </p>
+      </header>
+
+      <form onSubmit={submit} className="mt-6 space-y-4">
+        <div>
+          <label className="block text-sm font-medium">Naslov</label>
+          <input
+            required
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-cyan-400/60"
+            placeholder="npr. Da li je dozvoljeno kombinovanje molitvi tokom putovanja?"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Detalji</label>
+          <textarea
+            required
+            rows={6}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:border-cyan-400/60"
+            placeholder="Navedite kontekst, ono što ste pročitali i konkretne tačke oko kojih niste sigurni."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">
+            Kategorija (opcionalno)
+          </label>
+          <RadioChips
+            name="category"
+            options={catOptions}
+            value={category}
+            onChange={setCategory}
+          />
+          <p className="mt-1 text-xs text-slate-400">
+            Možete ovo ostaviti na "Bez kategorije". Kategorizovat ćemo to
+            kasnije.
           </p>
-        </header>
+        </div>
 
-        <form
-          className="rounded-2xl glass ring-tinted shadow-tinted p-5 space-y-5" /* action={createQuestion} */
-        >
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm text-slate-300 mb-1"
-            >
-              Naslov
-            </label>
-            <input
-              id="title"
-              name="title"
-              required
-              placeholder="Npr. Da li se spaja podne i ikindija u hanefijskom mezhebu?"
-              className="field w-full px-3 py-2"
-            />
-          </div>
+        <div className="pt-2">
+          <button className="btn-primary">Potvrdi</button>
+        </div>
+      </form>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="category"
-                className="block text-sm text-slate-300 mb-1"
-              >
-                Kategorija
-              </label>
-              <select
-                id="category"
-                name="category"
-                className="field w-full px-3 py-2"
-              >
-                {cats.map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="anon"
-                name="anon"
-                type="checkbox"
-                className="h-4 w-4 rounded border-white/20 bg-white/5"
-              />
-              <label htmlFor="anon" className="text-sm text-slate-300">
-                Objavi anonimno
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="body" className="block text-sm text-slate-300 mb-1">
-              Detalji
-            </label>
-            <textarea
-              id="body"
-              name="body"
-              required
-              rows={8}
-              placeholder="Napiši kontekst i konkretno pitanje…"
-              className="field w-full px-3 py-2"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button type="submit" className="btn-primary">
-              Objavi
-            </button>
-            <Link href="/questions" className="btn-ghost">
-              Nazad
-            </Link>
-          </div>
-        </form>
-
-        {/* For server action later:
-        export async function createQuestion(formData: FormData) { ... }
-        */}
-      </div>
+      <div className="py-16" />
     </main>
   );
 }

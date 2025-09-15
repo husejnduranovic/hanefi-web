@@ -1,250 +1,164 @@
 "use client";
-
 import Link from "next/link";
-import Image from "next/image";
-import { Menu, X, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import SearchModal from "@/components/common/search-modal";
-import Portal from "../common/portal";
+import { useEffect, useState } from "react";
+import { ThemeToggle } from "../common/theme-toggle";
 
-const NAV = [
-  { href: "/articles", label: "Članci" },
-  { href: "/categories", label: "Kategorije" },
-  { href: "/questions", label: "Pitanja" },
-];
-
-export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+export function Header() {
   const pathname = usePathname();
-
-  // treat parent routes as active (e.g. /articles/slug)
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
-
-  // mac vs windows hint for the search shortcut
-  const isMac = useMemo(
-    () =>
-      typeof navigator !== "undefined" &&
-      /Mac|iPod|iPhone|iPad/.test(navigator.platform),
-    []
-  );
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + K opens search
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
-      // Escape closes menus/modals
-      if (e.key === "Escape") {
-        setMenuOpen(false);
-        setSearchOpen(false);
-      }
-    };
-    const onScroll = () => setScrolled(window.scrollY > 6);
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("scroll", onScroll);
-    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]); // close when navigating
-  useEffect(() => {
-    document.documentElement.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
-  }, [menuOpen]);
+    setOpen(false);
+  }, [pathname]);
+
+  const nav = [
+    { name: "Početna", href: "/" },
+    { name: "Kategorije", href: "/categories" },
+    { name: "Članci", href: "/articles" },
+    { name: "Q&A", href: "/questions" },
+    { name: "Pobijanja", href: "/refutations" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50">
-      {/* top bar */}
-      <div
-        className={[
-          "h-14 border-b transition-all duration-200",
-          scrolled ? "glass-strong hairline shadow-tinted" : "glass hairline",
-        ].join(" ")}
-      >
-        <div className="container-soft grid h-full grid-cols-[auto_1fr_auto] items-center gap-4">
-          {/* Left: logo + brand */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 no-underline ring-focus rounded px-1 py-0.5"
-          >
-            <Image
-              src="/hm_header_option_3.png"
-              alt="Hanefijski Fikh"
-              width={20}
-              height={20}
-              className="h-5 w-5"
-              priority={false}
-            />
-            <span className="text-sm font-medium tracking-tight text-white">
-              Hanefijski Mezheb
+    <header
+      className={`sticky top-0 z-40 transition ${
+        scrolled
+          ? "backdrop-blur-md bg-black/30 border-b border-white/10"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-3">
+          <Link href="/" className="group inline-flex items-center gap-2">
+            <Crescent className="h-5 w-5 text-cyan-400 transition group-hover:rotate-12" />
+            <span className="text-sm font-semibold tracking-wide">
+              Islamski Članci
             </span>
           </Link>
 
-          {/* Center: desktop nav */}
           <nav
-            aria-label="Glavna navigacija"
-            className="hidden md:flex justify-center items-center gap-6 text-sm"
+            aria-label="Primary"
+            className="hidden md:flex items-center gap-6"
           >
-            {NAV.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={[
-                    "relative rounded px-1.5 py-0.5 transition-colors ring-focus",
-                    active ? "text-white" : "text-white/75 hover:text-white",
-                    // gradient underline (active + hover)
-                    "after:content-[''] after:absolute after:left-0 after:right-0 after:-bottom-1 after:h-[2px] after:rounded-full",
-                    active
-                      ? "after:bg-[linear-gradient(90deg,rgba(129,140,248,.9),rgba(56,189,248,.9))]"
-                      : "after:bg-transparent hover:after:bg-white/30",
-                  ].join(" ")}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            {nav.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                current={pathname === item.href}
+              >
+                {item.name}
+              </NavLink>
+            ))}
           </nav>
 
-          {/* Right: actions */}
-          <div className="flex items-center gap-2 sm:gap-3 justify-end">
-            {/* Search */}
-            <button
-              type="button"
-              aria-label="Pretraga"
-              onClick={() => setSearchOpen(true)}
-              className="icon-btn h-9 w-9 text-white/90"
-              title={`${isMac ? "⌘" : "Ctrl"} + K`}
-            >
-              <Search size={18} />
-            </button>
-
-            {/* (placeholder) theme toggle for later day/night */}
-            {/* <button aria-label="Tema" className="icon-btn h-9 w-9 text-white/90">
-              <Sun size={18} className="hidden dark:block" />
-              <Moon size={18} className="block dark:hidden" />
-            </button> */}
-
-            {/* Auth links */}
-            <Link
-              href="/signin"
-              className="hidden md:inline text-sm no-underline rounded px-2 py-1 text-white/85 hover:text-white ring-focus"
-            >
-              Prijava
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/questions" className="btn-ghost">
+              Postavi Pitanje
             </Link>
-            <Link
-              href="/signup"
-              className="hidden md:inline text-sm no-underline rounded px-2 py-1
-                         text-slate-50 border border-white/15 bg-white/10 hover:bg-white/14 ring-focus"
-            >
-              Registracija
+            <Link href="/articles" className="btn-primary">
+              Pregledaj Članke
             </Link>
-
-            {/* Mobile menu toggle */}
-            <button
-              type="button"
-              className="icon-btn inline-grid h-9 w-9 text-white/90 md:hidden"
-              aria-controls="mobile-menu"
-              aria-expanded={menuOpen ? "true" : "false"}
-              aria-label="Meni"
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
+            <ThemeToggle className="ml-2" />
           </div>
+
+          <button
+            className="md:hidden rounded-xl border border-white/10 bg-white/5 p-2"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className="sr-only">Prebaci meni</span>
+            <Burger open={open} />
+          </button>
         </div>
       </div>
 
-      {/* Mobile menu (animated height & opacity) */}
-      <Portal>
-        {/* Below the header only */}
+      {open && (
         <div
           id="mobile-menu"
-          aria-hidden={!menuOpen}
-          className={`md:hidden fixed left-0 right-0 top-14 bottom-0 z-40
-                transition-opacity duration-200
-                ${
-                  menuOpen
-                    ? "opacity-100 pointer-events-auto"
-                    : "opacity-0 pointer-events-none"
-                }`}
-          onClick={() => setMenuOpen(false)} // click overlay to close
+          className="md:hidden border-t border-white/10 bg-black/60 backdrop-blur-md"
         >
-          {/* Always-mounted blur/tint overlay (no flicker) */}
-          <div aria-hidden className="absolute inset-0 blur-stable" />
-
-          {/* Panel (stops overlay clicks) */}
-          <div
-            className={`relative transition-transform duration-200
-                  ${menuOpen ? "translate-y-0" : "-translate-y-1"}`}
-            onClick={(e) => e.stopPropagation()} // don't close when interacting panel
-          >
-            <div className="glass border-b shadow-tinted">
-              <div className="container-soft py-3">
-                <nav className="flex flex-col gap-1 text-sm">
-                  {NAV.map((item) => {
-                    const active = isActive(item.href);
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={[
-                          "block rounded-md px-3 py-2 ring-focus",
-                          active
-                            ? "text-white bg-white/8"
-                            : "text-white/85 hover:text-white hover:bg-white/5",
-                        ].join(" ")}
-                      >
-                        {item.label}
-                      </Link>
-                    );
-                  })}
-                </nav>
-
-                <div className="mt-3 flex gap-2">
-                  <Link
-                    href="/signin"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex-1 rounded-md px-3 py-2 text-sm text-center no-underline text-white/90 hover:bg-white/5 ring-focus"
-                  >
-                    Prijava
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex-1 rounded-md px-3 py-2 text-sm text-center no-underline text-slate-900
-                         bg-white/90 hover:bg-white shadow-tinted ring-1 ring-white/20 transition-colors ring-focus"
-                  >
-                    Registracija
-                  </Link>
-                </div>
-              </div>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
+            <nav className="grid gap-1" aria-label="Mobile">
+              {nav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-xl px-3 py-2 hover:bg-white/10"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-6 flex gap-3">
+              <Link href="/questions" className="btn-ghost flex-1">
+                Pitanja i odgovori
+              </Link>
+              <Link href="/articles" className="btn-primary flex-1">
+                Pregledaj
+              </Link>
             </div>
           </div>
         </div>
-      </Portal>
-
-      <SearchModal
-        open={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        action="/articles"
-      />
+      )}
     </header>
+  );
+}
+
+function NavLink({
+  href,
+  current,
+  children,
+}: {
+  href: string;
+  current: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={current ? "page" : undefined}
+      className={`text-sm transition hover:text-white ${
+        current ? "text-white" : "text-slate-300"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function Crescent(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+    </svg>
+  );
+}
+function Burger({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      className="text-slate-200"
+    >
+      {open ? (
+        <path d="M6 6l12 12M18 6L6 18" />
+      ) : (
+        <path d="M3 6h18M3 12h18M3 18h18" />
+      )}
+    </svg>
   );
 }

@@ -1,66 +1,91 @@
-// app/articles/page.tsx
-import ArticleRowCard from "@/components/articles/article-row-card";
-import ArticlesToolbar from "@/components/articles/articles-toolbar";
-import { fetchArticles, fetchCategories } from "@/lib/api";
-import Link from "next/link";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { articles, categories as allCategories } from "@/lib/mock";
+import {
+  ArticleSort,
+  ArticleToolbar,
+} from "@/components/articles/article-toolbar";
+import { Section } from "@/components/common/section";
+import { ArticleCard } from "@/components/articles/article-card";
+import { Pagination } from "@/components/common/pagination";
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Articles" };
+
+const PAGE_SIZE = 9;
 
 export default async function ArticlesIndex({
   searchParams,
 }: {
-  searchParams: {
+  // Next.js v15 dynamic APIs: searchParams is a Promise
+  searchParams: Promise<{
     q?: string;
     category?: string;
-    sort?: "latest" | "popular";
+    sort?: ArticleSort;
     page?: string;
-  };
+  }>;
 }) {
-  const q = (searchParams.q ?? "").trim();
-  const category = searchParams.category ?? "";
-  const sort = (searchParams.sort === "popular" ? "popular" : "latest") as
-    | "latest"
-    | "popular";
+  const {
+    q = "",
+    category = "",
+    sort = "latest",
+    page = "1",
+  } = await searchParams;
 
-  const [{ items }, cats] = await Promise.all([
-    fetchArticles({ q, category, sort, page: 1, limit: 50 }),
-    fetchCategories(),
-  ]);
+  // derive categories list for filter (stable order)
+  const categories = Array.from(new Set(allCategories.map((c) => c.name)));
+
+  // Filter + sort in-memory (mock). Replace with DB call later.
+  let filtered = articles.filter((a) => {
+    const okCat = !category || a.category === category;
+    const okQ =
+      !q ||
+      [a.title, a.excerpt, a.category]
+        .join(" ")
+        .toLowerCase()
+        .includes(q.toLowerCase());
+    return okCat && okQ;
+  });
+
+  filtered.sort((a, b) => {
+    if (sort === "popular") return b.viewCount - a.viewCount;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const pageNum = Math.max(
+    1,
+    parseInt(Array.isArray(page) ? page[0] : page, 10) || 1
+  );
+  const start = (pageNum - 1) * PAGE_SIZE;
+  const paged = filtered.slice(start, start + PAGE_SIZE);
 
   return (
-    <>
-      <div className="container-soft pt-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white soft-trans ring-focus"
-          aria-label="Nazad na početnu"
-        >
-          <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden>
-            <path
-              d="M12 5L7 10l5 5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          Pocetna
-        </Link>
-      </div>
-      <main className="relative py-10 sm:py-14">
-        <div className="container-soft space-y-6">
-          <ArticlesToolbar
-            cats={cats.map((c) => ({ slug: c.slug, title: c.title }))}
-          />
-          <div className="space-y-3">
-            {items.length === 0 ? (
-              <div className="text-slate-300">Nema rezultata.</div>
-            ) : (
-              items.map((a) => <ArticleRowCard key={a.id} a={a} />)
-            )}
-          </div>
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <Section
+        title="Članci"
+        subtitle={`${filtered.length} rezultat${
+          filtered.length === 1 ? "" : "a"
+        }`}
+      >
+        {/* Toolbar runs on client to manipulate URL params */}
+        <Suspense>
+          <ArticleToolbar categories={["", ...categories]} />
+        </Suspense>
+
+        {/* Results grid */}
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {paged.map((a) => (
+            <ArticleCard key={a.id} article={a} />
+          ))}
         </div>
-      </main>
-    </>
+
+        {/* Pagination */}
+        <Pagination
+          page={pageNum}
+          pageSize={PAGE_SIZE}
+          total={filtered.length}
+        />
+      </Section>
+      <div className="py-16" />
+    </main>
   );
 }

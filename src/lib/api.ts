@@ -508,14 +508,6 @@ export async function fetchCategories(): Promise<SimpleCategory[]> {
       accent: "indigo",
       count: 18,
     },
-    {
-      slug: "pobijanja",
-      title: "Pobijanja",
-      blurb: "Umjerena razjašnjenja i odgovori bez polemike.",
-      img: "/images/discover/discovercardbg1.png",
-      accent: "amber",
-      count: 5,
-    },
   ];
 }
 
