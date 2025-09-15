@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer";
 
 export const metadata: Metadata = {
   title: {
-    default: "Islamski Članci",
+    default: "Hanefijski mezheb",
     template: "%s — Islamic Articles",
   },
   description:

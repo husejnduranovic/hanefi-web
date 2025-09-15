@@ -41,7 +41,7 @@ export function Header() {
           <Link href="/" className="group inline-flex items-center gap-2">
             <Crescent className="h-5 w-5 text-cyan-400 transition group-hover:rotate-12" />
             <span className="text-sm font-semibold tracking-wide">
-              Islamski Članci
+              Hanefijski Mezheb
             </span>
           </Link>
 

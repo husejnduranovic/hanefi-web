@@ -11,7 +11,7 @@ export function Footer() {
             <div className="inline-flex items-center gap-2">
               <Crescent className="h-5 w-5 text-cyan-400" />
               <span className="text-sm font-semibold tracking-wide">
-                Islamski Članci
+                Hanefijski Mezheb
               </span>
             </div>
             <p className="mt-3 text-sm text-slate-300/85 max-w-xs">
